@@ -1,0 +1,102 @@
+name: Publish Docker image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * 1' # Weekly on Monday at 10:00
+
+jobs:
+
+  latest-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build latest Alpine version and publish to GitHub Container Registry
+        uses: elgohr/Publish-Docker-Github-Action@v4
+        with:
+          name: 104lab/lazy-php
+          tags: "latest,8.1,cli,8.1-cli"
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          dockerfile: 8.1/Dockerfile
+
+  latest-alpine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build latest Alpine version and publish to GitHub Container Registry
+        uses: elgohr/Publish-Docker-Github-Action@v4
+        with:
+          name: 104lab/lazy-php
+          tags: "alpine,8.1-alpine"
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          dockerfile: 8.1/alpine/Dockerfile
+
+  latest-apache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build latest Apache version and publish to GitHub Container Registry
+        uses: elgohr/Publish-Docker-Github-Action@v4
+        with:
+          name: 104lab/lazy-php
+          tags: "apache,8.1-apache"
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          dockerfile: 8.1/apache/Dockerfile
+
+  cli:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6", "5.5"]
+    steps:
+      - uses: actions/checkout@master
+      - name: Build PHP ${{ matrix.version }} CLI and publish to GitHub Registry
+        uses: elgohr/Publish-Docker-Github-Action@v4
+        with:
+          name: 104lab/lazy-php
+          tags: ${{ matrix.version }},${{ matrix.version }}-cli
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          dockerfile: ${{ matrix.version }}/Dockerfile
+
+  alpine:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6", "5.5"]
+    steps:
+      - uses: actions/checkout@master
+      - name: Build PHP ${{ matrix.version }} Alpine and publish to GitHub Registry
+        uses: elgohr/Publish-Docker-Github-Action@v4
+        with:
+          name: 104lab/lazy-php:${{ matrix.version }}-alpine
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          dockerfile: ${{ matrix.version }}/alpine/Dockerfile
+
+  apache:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["8.0", "7.4", "7.3", "7.2", "7.1", "7.0", "5.6", "5.5"]
+    steps:
+      - uses: actions/checkout@master
+      - name: Build PHP ${{ matrix.version }} Apache and publish to GitHub Registry
+        uses: elgohr/Publish-Docker-Github-Action@v4
+        with:
+          name: 104lab/lazy-php:${{ matrix.version }}-apache
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          dockerfile: ${{ matrix.version }}/apache/Dockerfile
